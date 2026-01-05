@@ -1,3 +1,12 @@
+## 一键部署脚本
+
+提醒：开放8080端口
+
+```
+curl -fsSL https://raw.githubusercontent.com/woniu336/whois/main/install.sh | sudo bash
+```
+
+
 # 域名到期监控系统 - 部署指南
 
 ## 部署文件清单
