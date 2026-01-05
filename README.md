@@ -6,8 +6,7 @@
 curl -fsSL https://raw.githubusercontent.com/woniu336/whois/main/install.sh | sudo bash
 ```
 
-
-# 域名到期监控系统 - 部署指南
+通知说明： `剩余天数`精准匹配`提醒天数`就会触发通知，默认在凌晨两点通知(可在检测频率)设置
 
 ## 部署文件清单
 
