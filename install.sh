@@ -73,9 +73,7 @@ if systemctl is-active --quiet domain-monitor; then
     echo "  查看日志: journalctl -u domain-monitor -f"
     echo "  重启服务: systemctl restart domain-monitor"
     echo "  停止服务: systemctl stop domain-monitor"
-    echo "  修改配置: vi $INSTALL_DIR/config/config.yaml"
     echo ""
-    echo "⚠️  首次使用请编辑配置文件后重启服务"
 else
     echo "❌ 服务启动失败，请检查日志: journalctl -u domain-monitor -xe"
     exit 1
