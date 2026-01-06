@@ -11,6 +11,8 @@ curl -fsSL https://raw.githubusercontent.com/woniu336/whois/main/install.sh | su
 
 通知说明： `剩余天数`精准匹配`提醒天数`就会触发通知，默认在凌晨两点通知(可在检测频率)设置
 
+通知生效需要重启：`systemctl restart domain-monitor`
+
 ## 部署文件清单
 
 部署时需要以下文件/目录：
