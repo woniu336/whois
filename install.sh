@@ -11,28 +11,43 @@ echo "==> 开始安装域名监控系统..."
 
 # 创建安装目录
 echo "==> 创建安装目录: $INSTALL_DIR"
-mkdir -p $INSTALL_DIR
-cd $INSTALL_DIR
+mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR"
 
 # 下载二进制文件
 echo "==> 下载二进制文件..."
-curl -L -o domain-monitor $BINARY_URL
+curl -L -o domain-monitor "$BINARY_URL"
 chmod +x domain-monitor
 
-# 下载配置文件和Web文件
+# 下载配置文件和 Web 静态资源
 echo "==> 下载配置文件和静态资源..."
-curl -L -o web-config.tar.gz $WEB_CONFIG_URL
+curl -L -o web-config.tar.gz "$WEB_CONFIG_URL"
 tar -xzf web-config.tar.gz
 rm -f web-config.tar.gz
 
-# 复制配置示例（不再提示编辑）
+# ===== 关键修复点：配置文件兜底生成 =====
+echo "==> 检查配置文件..."
+
+mkdir -p config
+
 if [ ! -f config/config.yaml ]; then
-    echo "==> 创建配置文件..."
-    cp config/config.yaml.example config/config.yaml
+    if [ -f config/config.yaml.example ]; then
+        cp config/config.yaml.example config/config.yaml
+        echo "==> 已自动生成 config/config.yaml"
+    else
+        echo "❌ 缺少 config.yaml.example，无法生成配置文件"
+        exit 1
+    fi
 fi
 
-# 创建systemd服务
-echo "==> 创建systemd服务..."
+# 启动前强校验，防止 systemd 无限重启
+if [ ! -s config/config.yaml ]; then
+    echo "❌ 配置文件为空: $INSTALL_DIR/config/config.yaml"
+    exit 1
+fi
+
+# 创建 systemd 服务
+echo "==> 创建 systemd 服务..."
 cat > /etc/systemd/system/domain-monitor.service <<EOF
 [Unit]
 Description=Domain Expiry Monitor Service
@@ -50,13 +65,13 @@ RestartSec=5s
 WantedBy=multi-user.target
 EOF
 
-# 重新加载systemd
+# 重新加载 systemd
 systemctl daemon-reload
 
 # 启动并设置开机自启
 echo "==> 启动服务..."
-systemctl start domain-monitor
 systemctl enable domain-monitor
+systemctl start domain-monitor
 
 # 检查服务状态
 sleep 2
@@ -74,6 +89,7 @@ if systemctl is-active --quiet domain-monitor; then
     echo "  停止服务: systemctl stop domain-monitor"
     echo ""
 else
-    echo "❌ 服务启动失败，请检查日志: journalctl -u domain-monitor -xe"
+    echo "❌ 服务启动失败，请检查日志:"
+    journalctl -u domain-monitor -n 50 --no-pager
     exit 1
 fi
